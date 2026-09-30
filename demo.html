@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=720, initial-scale=1">
+<title>VisionQuantech AI Workforce — Demo</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:720px; height:1280px; overflow:hidden; background:#0b1220;
+    font-family:'Noto Sans','DejaVu Sans',Arial,sans-serif; color:#e8eef5;
+    -webkit-font-smoothing:antialiased; }
+  .scene { position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; opacity:0; transition:opacity .6s ease;
+    pointer-events:none; padding:48px; text-align:center; }
+  .scene.on { opacity:1; }
+
+  /* ---------- Scene 1 : hook ---------- */
+  #s1 { background:radial-gradient(120% 90% at 50% 10%, #16233c 0%, #0b1220 70%); }
+  #s1 .clock { font-size:120px; font-weight:200; letter-spacing:2px; color:#fff; }
+  #s1 .l1 { font-size:38px; margin-top:26px; color:#cdd8e4; }
+  #s1 .l2 { font-size:38px; margin-top:10px; color:#fff; font-weight:700; }
+  #s1 .l2 b { color:#4ade80; }
+
+  /* ---------- Scene 2 : chat ---------- */
+  #s2 { padding:0; justify-content:flex-start; background:#0d1418; }
+  .chat-head { width:100%; background:#1f2c34; padding:26px 28px; display:flex;
+    align-items:center; gap:20px; box-shadow:0 2px 8px rgba(0,0,0,.4); z-index:2; }
+  .avatar { width:84px; height:84px; border-radius:50%; background:linear-gradient(135deg,#25d366,#128c7e);
+    display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:700; color:#06281c; flex:none; }
+  .chat-head .who { text-align:left; }
+  .chat-head .who .nm { font-size:32px; font-weight:700; color:#fff; }
+  .chat-head .who .st { font-size:24px; color:#4ade80; margin-top:4px; }
+  #chat { flex:1; width:100%; overflow:hidden; padding:28px 24px 20px; display:flex;
+    flex-direction:column; gap:18px; }
+  .msg { max-width:82%; padding:18px 22px; border-radius:18px; font-size:29px; line-height:1.45;
+    animation:pop .25s ease; word-wrap:break-word; }
+  @keyframes pop { from { transform:scale(.92); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .msg.user { align-self:flex-end; background:#005c4b; color:#eafff5; border-bottom-right-radius:6px; }
+  .msg.agent { align-self:flex-start; background:#1f2c34; color:#e8eef5; border-bottom-left-radius:6px; }
+  .msg .tm { display:block; text-align:right; font-size:19px; color:rgba(255,255,255,.45); margin-top:8px; }
+  .typing { align-self:flex-start; background:#1f2c34; border-radius:18px; border-bottom-left-radius:6px;
+    padding:22px 28px; display:flex; gap:10px; }
+  .typing i { width:16px; height:16px; border-radius:50%; background:#8fa3b0; animation:bl 1s infinite; }
+  .typing i:nth-child(2){ animation-delay:.15s } .typing i:nth-child(3){ animation-delay:.3s }
+  @keyframes bl { 0%,60%,100%{ opacity:.25; transform:none } 30%{ opacity:1; transform:translateY(-6px) } }
+  .bookcard { align-self:flex-start; background:#f4f7f9; color:#12202b; border-radius:16px;
+    padding:24px 26px; max-width:86%; text-align:left; animation:pop .25s ease; }
+  .bookcard .t { font-size:26px; font-weight:700; color:#128c7e; margin-bottom:12px; }
+  .bookcard .r { font-size:27px; margin-top:6px; }
+  .bookcard .r b { font-weight:700; }
+  .caption { width:100%; text-align:center; font-size:30px; color:#9fb2c3; padding:18px 30px 26px; }
+
+  /* ---------- Scene 3 : owner ---------- */
+  #s3 { background:radial-gradient(120% 90% at 50% 10%, #16233c 0%, #0b1220 70%); justify-content:flex-start; padding-top:220px; }
+  #s3 .cap { font-size:36px; color:#cdd8e4; margin-bottom:50px; }
+  .notif { width:620px; background:#f4f7f9; color:#12202b; border-radius:26px; padding:30px 32px;
+    text-align:left; box-shadow:0 18px 60px rgba(0,0,0,.5); transform:translateY(-40px); opacity:0;
+    transition:all .7s cubic-bezier(.2,.9,.3,1.2); }
+  .notif.show { transform:none; opacity:1; }
+  .notif .app { font-size:24px; color:#75828d; text-transform:uppercase; letter-spacing:2px; }
+  .notif .hd { font-size:32px; font-weight:700; margin:10px 0 14px; }
+  .notif .bd { font-size:29px; line-height:1.5; }
+  .notif .bd b { color:#128c7e; }
+
+  /* ---------- Scene 4 : end card ---------- */
+  #s4 { background:radial-gradient(120% 90% at 50% 0%, #123126 0%, #0b1220 65%); }
+  #s4 .brand { font-size:44px; letter-spacing:6px; color:#4ade80; font-weight:700; }
+  #s4 .prod { font-size:64px; font-weight:800; color:#fff; margin-top:14px; }
+  #s4 .div { width:120px; height:5px; background:#4ade80; border-radius:3px; margin:44px 0; }
+  #s4 .p1 { font-size:40px; color:#e8eef5; }
+  #s4 .p2 { font-size:40px; color:#e8eef5; margin-top:12px; }
+  #s4 .p2 b { color:#4ade80; }
+  #s4 .cta { margin-top:60px; background:#25d366; color:#06281c; font-size:31px; font-weight:700;
+    padding:26px 44px; border-radius:60px; }
+</style>
+</head>
+<body>
+
+<!-- SCENE 1 : hook -->
+<div class="scene on" id="s1">
+  <div class="clock">11:47 PM</div>
+  <div class="l1">Your clinic is closed.</div>
+  <div class="l2">But customers are <b>still messaging.</b></div>
+</div>
+
+<!-- SCENE 2 : chat -->
+<div class="scene" id="s2">
+  <div class="chat-head">
+    <div class="avatar">S</div>
+    <div class="who"><div class="nm">SmileCare Dental</div><div class="st">online</div></div>
+  </div>
+  <div id="chat"></div>
+  <div class="caption" id="chatcap">Maya, the AI receptionist, replies instantly.</div>
+</div>
+
+<!-- SCENE 3 : owner notification -->
+<div class="scene" id="s3">
+  <div class="cap">Meanwhile, on your phone…</div>
+  <div class="notif" id="notif">
+    <div class="app">SmileCare Dental · now</div>
+    <div class="hd">New booking received</div>
+    <div class="bd">Root canal consultation<br>Tomorrow, 11:00 AM · Ref <b>VQT-8X2K</b><br>Patient details saved to your dashboard.</div>
+  </div>
+</div>
+
+<!-- SCENE 4 : end card -->
+<div class="scene" id="s4">
+  <div class="brand">VISIONQUANTECH</div>
+  <div class="prod">AI Workforce</div>
+  <div class="div"></div>
+  <div class="p1">Every enquiry answered.</div>
+  <div class="p2">Every booking captured. <b>24×7.</b></div>
+  <div class="cta">Reply “interested” to get this for your business</div>
+</div>
+
+<script>
+(function(){
+  var chat = document.getElementById('chat');
+  function now(){ var d=new Date(); var h=d.getHours(), m=('0'+d.getMinutes()).slice(-2);
+    var ap=h>=12?'pm':'am'; h=h%12||12; return h+':'+m+' '+ap; }
+  function scroll(){ chat.scrollTop = chat.scrollHeight; }
+  function bubble(text, who){
+    var el=document.createElement('div');
+    el.className='msg '+who;
+    el.innerHTML=text+'<span class="tm">'+now()+'</span>';
+    chat.appendChild(el); scroll();
+  }
+  var typingEl=null;
+  function typing(on){
+    if(on){ typingEl=document.createElement('div'); typingEl.className='typing';
+      typingEl.innerHTML='<i></i><i></i><i></i>'; chat.appendChild(typingEl); scroll(); }
+    else if(typingEl){ typingEl.remove(); typingEl=null; }
+  }
+  function bookCard(){
+    var el=document.createElement('div'); el.className='bookcard';
+    el.innerHTML='<div class="t">Appointment confirmed</div>'
+      +'<div class="r"><b>Root canal consultation</b></div>'
+      +'<div class="r">Tomorrow · 11:00 AM</div>'
+      +'<div class="r">Ref: <b>VQT-8X2K</b></div>';
+    chat.appendChild(el); scroll();
+  }
+  function show(id){ document.querySelectorAll('.scene').forEach(function(s){ s.classList.remove('on'); });
+    document.getElementById(id).classList.add('on'); }
+  function at(ms, fn){ setTimeout(fn, ms); }
+
+  /* ---------- timeline ---------- */
+  at(4000,  function(){ show('s2'); });
+  at(6000,  function(){ bubble('Hi, do you do root canals? How much does it cost?', 'user'); });
+  at(8800,  function(){ typing(true); });
+  at(10300, function(){ typing(false);
+    bubble('Hi! Yes, we do. A root canal is ₹4,999 and the consultation is free. What seems to be the problem?', 'agent'); });
+  at(14800, function(){ bubble('Severe pain in my lower molar since 2 days', 'user'); });
+  at(17600, function(){ typing(true); });
+  at(19200, function(){ typing(false);
+    bubble("I'm sorry to hear that. We have an emergency slot <b>tomorrow at 11:00 AM</b>. Shall I book it for you?", 'agent'); });
+  at(23200, function(){ bubble('Yes please, book it', 'user'); });
+  at(25800, function(){ typing(true); });
+  at(27800, function(){ typing(false);
+    bubble('Done — your appointment is booked for <b>tomorrow at 11:00 AM</b>.', 'agent'); bookCard(); });
+  at(32800, function(){ bubble('Great, thanks!', 'user'); });
+  at(35200, function(){ typing(true); });
+  at(36500, function(){ typing(false);
+    bubble("You're welcome! We'll see you tomorrow.", 'agent'); });
+  at(40000, function(){ show('s3'); });
+  at(40800, function(){ document.getElementById('notif').classList.add('show'); });
+  at(47000, function(){ show('s4'); });
+  at(56000, function(){ document.title='DONE'; });
+})();
+</script>
+</body>
+</html>
